@@ -1,0 +1,40 @@
+FROM ubuntu:24.04
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y curl
+
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash
+
+RUN apt-get install -y nodejs
+
+COPY 1_12 . 
+
+RUN npm install 
+
+ENV REACT_APP_BACKEND_URL=http://127.0.0.1:8080/
+
+RUN npm run build
+
+RUN npm install -g serve
+
+EXPOSE 5001
+
+
+
+CMD ["serve","-s","-l","5001","build"]
+FROM golang:1.16
+
+WORKDIR /app
+
+COPY 1_13 .
+
+RUN go build 
+
+ENV REQUEST_ORIGIN=http://127.0.0.1:5001
+
+ENV PORT=8080
+
+EXPOSE 8080
+
+CMD ["./server"]
